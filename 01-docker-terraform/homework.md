@@ -151,3 +151,53 @@ Top 5 longest trips:
 ```
 
 **Answer: 2025-11-14** (longest trip: 88.03 miles)
+
+## Question 5. Biggest pickup zone
+
+**Question:** Which was the pickup zone with the largest total_amount (sum of all trips) on November 18th, 2025?
+
+**SQL Query:**
+```sql
+SELECT z.Zone, SUM(g.total_amount) as zone_total
+FROM green_taxi_trips g
+JOIN taxi_zones z ON g.PULocationID = z.LocationID
+WHERE g.lpep_pickup_datetime >= '2025-11-18'
+  AND g.lpep_pickup_datetime < '2025-11-19'
+GROUP BY z.Zone
+ORDER BY zone_total DESC
+LIMIT 5;
+```
+
+**Python alternative:**
+```python
+import pandas as pd
+
+df = pd.read_parquet('green_tripdata_2025-11.parquet')
+zones = pd.read_csv('taxi_zone_lookup.csv')
+
+# Filter for November 18th, 2025
+df_nov18 = df[
+    (df['lpep_pickup_datetime'] >= '2025-11-18') &
+    (df['lpep_pickup_datetime'] < '2025-11-19')
+]
+
+# Join with zones
+df_joined = df_nov18.merge(zones, left_on='PULocationID', right_on='LocationID')
+
+# Group by zone and sum total_amount
+zone_totals = df_joined.groupby('Zone')['total_amount'].sum().sort_values(ascending=False)
+print(zone_totals.head(5))
+```
+
+**Output:**
+```
+Top 5 zones by total_amount on Nov 18:
+Zone
+East Harlem North              9281.92
+East Harlem South              6696.13
+Central Park                   2378.79
+Washington Heights South       2139.05
+Morningside Heights            2100.59
+```
+
+**Answer: East Harlem North** (total: $9,281.92)
