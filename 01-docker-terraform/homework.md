@@ -201,3 +201,61 @@ Morningside Heights            2100.59
 ```
 
 **Answer: East Harlem North** (total: $9,281.92)
+
+## Question 6. Largest tip
+
+**Question:** For passengers picked up in "East Harlem North" in November 2025, which drop-off zone had the largest tip?
+
+**SQL Query:**
+```sql
+SELECT dz.Zone as dropoff_zone, g.tip_amount
+FROM green_taxi_trips g
+JOIN taxi_zones pz ON g.PULocationID = pz.LocationID
+JOIN taxi_zones dz ON g.DOLocationID = dz.LocationID
+WHERE pz.Zone = 'East Harlem North'
+  AND g.lpep_pickup_datetime >= '2025-11-01'
+  AND g.lpep_pickup_datetime < '2025-12-01'
+ORDER BY g.tip_amount DESC
+LIMIT 5;
+```
+
+**Python alternative:**
+```python
+import pandas as pd
+
+df = pd.read_parquet('green_tripdata_2025-11.parquet')
+zones = pd.read_csv('taxi_zone_lookup.csv')
+
+# Filter for November 2025
+df_nov = df[
+    (df['lpep_pickup_datetime'] >= '2025-11-01') &
+    (df['lpep_pickup_datetime'] < '2025-12-01')
+]
+
+# Join for pickup zone
+df_joined = df_nov.merge(zones, left_on='PULocationID', right_on='LocationID')
+
+# Filter for East Harlem North pickup
+df_ehn = df_joined[df_joined['Zone'] == 'East Harlem North']
+
+# Join for dropoff zone
+zones_do = zones.rename(columns={'LocationID': 'DO_ID', 'Zone': 'DO_Zone'})
+df_ehn = df_ehn.merge(zones_do[['DO_ID', 'DO_Zone']], left_on='DOLocationID', right_on='DO_ID')
+
+# Find largest tip
+idx_max = df_ehn['tip_amount'].idxmax()
+print(f"Drop-off zone: {df_ehn.loc[idx_max, 'DO_Zone']}")
+print(f"Tip amount: ${df_ehn.loc[idx_max, 'tip_amount']:.2f}")
+```
+
+**Output:**
+```
+Top 5 tips from East Harlem North:
+      lpep_pickup_datetime  tip_amount                        DO_Zone
+      2025-11-30 16:30:27       81.89                 Yorkville West
+      2025-11-23 13:35:27       50.00              LaGuardia Airport
+      2025-11-29 01:44:21       45.00              East Harlem North
+      2025-11-24 08:36:03       34.25  Long Island City/Queens Plaza
+```
+
+**Answer: Yorkville West** (largest tip: $81.89)
