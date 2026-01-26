@@ -58,3 +58,47 @@ docker exec postgres netstat -tlnp | grep 5432
 - `localhost` from pgadmin would refer to the pgadmin container itself, not postgres
 
 **Answer: db:5432** (or postgres:5432 - both are correct)
+
+## Question 3. Counting short trips
+
+**Data preparation:**
+```bash
+# Download green taxi trips data for November 2025
+wget https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-11.parquet
+
+# Download taxi zone lookup data
+wget https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv
+```
+
+**SQL Query:**
+```sql
+SELECT COUNT(*)
+FROM green_taxi_trips
+WHERE lpep_pickup_datetime >= '2025-11-01'
+  AND lpep_pickup_datetime < '2025-12-01'
+  AND trip_distance <= 1;
+```
+
+**Python alternative:**
+```python
+import pandas as pd
+
+df = pd.read_parquet('green_tripdata_2025-11.parquet')
+
+count = df[
+    (df['lpep_pickup_datetime'] >= '2025-11-01') &
+    (df['lpep_pickup_datetime'] < '2025-12-01') &
+    (df['trip_distance'] <= 1)
+].shape[0]
+
+print(f"Trips with distance <= 1 mile: {count}")
+```
+
+**Output:**
+```
+Total rows in dataset: 46,912
+Date range: 2025-10-26 to 2025-12-01
+Trips with distance <= 1 mile in November 2025: 8,007
+```
+
+**Answer: 8,007**
