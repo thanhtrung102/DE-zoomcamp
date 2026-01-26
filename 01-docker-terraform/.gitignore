@@ -1,7 +1,3 @@
-# Data files (download separately)
-data/
-*.parquet
-*.csv
 
 # Python
 __pycache__/
