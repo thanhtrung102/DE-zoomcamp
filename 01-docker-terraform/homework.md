@@ -259,3 +259,38 @@ Top 5 tips from East Harlem North:
 ```
 
 **Answer: Yorkville West** (largest tip: $81.89)
+
+---
+
+## Terraform
+
+## Question 7. Terraform Workflow
+
+**Question:** Which sequence describes the workflow for:
+1. Downloading the provider plugins and setting up backend
+2. Generating proposed changes and auto-executing the plan
+3. Remove all resources managed by terraform
+
+**Options:**
+- `terraform import, terraform apply -y, terraform destroy`
+- `terraform init, terraform plan -auto-apply, terraform rm`
+- `terraform init, terraform run -auto-approve, terraform destroy`
+- `terraform init, terraform apply -auto-approve, terraform destroy`
+- `terraform import, terraform apply -y, terraform rm`
+
+**Analysis:**
+
+| Step | Correct Command | Purpose |
+|------|-----------------|---------|
+| Download plugins & setup backend | `terraform init` | Initializes working directory, downloads providers |
+| Generate & auto-execute plan | `terraform apply -auto-approve` | Creates plan and applies without confirmation prompt |
+| Remove all resources | `terraform destroy` | Destroys all managed infrastructure |
+
+**Why other options are wrong:**
+- `terraform import` - imports existing resources into state, not initialization
+- `terraform plan -auto-apply` - not a valid command combination
+- `terraform run -auto-approve` - `terraform run` doesn't exist
+- `terraform apply -y` - invalid flag (correct is `-auto-approve`)
+- `terraform rm` - doesn't exist (use `terraform destroy`)
+
+**Answer: terraform init, terraform apply -auto-approve, terraform destroy**
