@@ -7,6 +7,13 @@
 docker run -it --entrypoint bash python:3.13 -c "pip --version"
 ```
 
+**Command explanation:**
+- `docker run` - Create and run a new container
+- `-it` - Interactive mode with TTY (terminal) attached
+- `--entrypoint bash` - Override the default entrypoint to use bash shell
+- `python:3.13` - Use the official Python 3.13 image
+- `-c "pip --version"` - Execute this command in bash and exit
+
 **Output:**
 ```
 pip 25.3 from /usr/local/lib/python3.13/site-packages/pip (python 3.13)
