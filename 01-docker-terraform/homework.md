@@ -102,3 +102,52 @@ Trips with distance <= 1 mile in November 2025: 8,007
 ```
 
 **Answer: 8,007**
+
+## Question 4. Longest trip for each day
+
+**Question:** Which was the pickup day with the longest trip distance? (excluding trips >= 100 miles)
+
+**SQL Query:**
+```sql
+SELECT DATE(lpep_pickup_datetime) as pickup_date, MAX(trip_distance) as max_distance
+FROM green_taxi_trips
+WHERE trip_distance < 100
+  AND lpep_pickup_datetime >= '2025-11-01'
+  AND lpep_pickup_datetime < '2025-12-01'
+GROUP BY DATE(lpep_pickup_datetime)
+ORDER BY max_distance DESC
+LIMIT 1;
+```
+
+**Python alternative:**
+```python
+import pandas as pd
+
+df = pd.read_parquet('green_tripdata_2025-11.parquet')
+
+# Filter trips with distance < 100 miles
+df_filtered = df[
+    (df['trip_distance'] < 100) &
+    (df['lpep_pickup_datetime'] >= '2025-11-01') &
+    (df['lpep_pickup_datetime'] < '2025-12-01')
+]
+
+# Find the trip with max distance
+idx_max = df_filtered['trip_distance'].idxmax()
+longest_trip = df_filtered.loc[idx_max]
+print(f"Pickup date: {longest_trip['lpep_pickup_datetime']}")
+print(f"Trip distance: {longest_trip['trip_distance']} miles")
+```
+
+**Output:**
+```
+Top 5 longest trips:
+      lpep_pickup_datetime  trip_distance
+      2025-11-14 15:36:27          88.03
+      2025-11-20 12:28:02          73.84
+      2025-11-23 10:12:18          45.26
+      2025-11-22 02:07:07          40.16
+      2025-11-15 14:12:35          39.81
+```
+
+**Answer: 2025-11-14** (longest trip: 88.03 miles)
