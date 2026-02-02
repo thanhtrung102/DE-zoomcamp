@@ -1,0 +1,79 @@
+id: taxi_data_pipeline
+namespace: de-zoomcamp
+
+description: |
+  Load NYC taxi trip data from GitHub releases.
+  Supports yellow and green taxi data.
+
+inputs:
+  - id: taxi
+    type: SELECT
+    displayName: Taxi Type
+    values:
+      - yellow
+      - green
+    defaults: yellow
+
+  - id: year
+    type: STRING
+    displayName: Year
+    defaults: "2020"
+
+  - id: month
+    type: STRING
+    displayName: Month (01-12)
+    defaults: "01"
+
+variables:
+  file: "{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv"
+  url: "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{{inputs.taxi}}/{{render(vars.file)}}.gz"
+
+tasks:
+  - id: extract
+    type: io.kestra.plugin.core.http.Download
+    uri: "{{render(vars.url)}}"
+
+  - id: decompress
+    type: io.kestra.plugin.compress.ArchiveDecompress
+    from: "{{outputs.extract.uri}}"
+    algorithm: GZIP
+
+  - id: load_to_duckdb
+    type: io.kestra.plugin.scripts.python.Script
+    docker:
+      image: python:3.11-slim
+    beforeCommands:
+      - pip install duckdb pandas
+    inputFiles:
+      data.csv: "{{outputs.decompress.files[render(vars.file)]}}"
+    script: |
+      import duckdb
+      import pandas as pd
+
+      # Read the CSV
+      df = pd.read_csv('data.csv')
+      print(f"Loaded {len(df):,} rows from {{render(vars.file)}}")
+
+      # Connect to DuckDB and create/append to table
+      con = duckdb.connect('taxi_data.duckdb')
+
+      table_name = '{{inputs.taxi}}_tripdata'
+      con.execute(f"""
+          CREATE TABLE IF NOT EXISTS {table_name} AS
+          SELECT * FROM df WHERE 1=0
+      """)
+
+      con.execute(f"INSERT INTO {table_name} SELECT * FROM df")
+
+      row_count = con.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+      print(f"Total rows in {table_name}: {row_count:,}")
+
+      con.close()
+
+triggers:
+  - id: monthly_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 9 1 * *"
+    timezone: America/New_York
+    inputs:
+      taxi: yellow

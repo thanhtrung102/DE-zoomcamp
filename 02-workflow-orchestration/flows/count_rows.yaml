@@ -1,0 +1,68 @@
+id: count_rows
+namespace: de-zoomcamp
+
+description: |
+  Count rows in taxi data files.
+  Used for answering homework questions.
+
+inputs:
+  - id: taxi
+    type: SELECT
+    displayName: Taxi Type
+    values:
+      - yellow
+      - green
+    defaults: yellow
+
+  - id: year
+    type: STRING
+    displayName: Year
+    defaults: "2020"
+
+  - id: month
+    type: STRING
+    displayName: Month (01-12, or 'all' for entire year)
+    defaults: "all"
+
+tasks:
+  - id: count
+    type: io.kestra.plugin.scripts.python.Script
+    docker:
+      image: python:3.11-slim
+    beforeCommands:
+      - pip install pandas
+    script: |
+      import pandas as pd
+
+      taxi = "{{inputs.taxi}}"
+      year = "{{inputs.year}}"
+      month = "{{inputs.month}}"
+
+      base_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{taxi}/"
+
+      if month == "all":
+          months = range(1, 13)
+      else:
+          months = [int(month)]
+
+      total_rows = 0
+      results = []
+
+      for m in months:
+          file = f"{taxi}_tripdata_{year}-{m:02d}.csv.gz"
+          url = base_url + file
+          try:
+              df = pd.read_csv(url, compression='gzip')
+              rows = len(df)
+              total_rows += rows
+              results.append(f"{file}: {rows:,} rows")
+              print(f"{file}: {rows:,} rows")
+          except Exception as e:
+              results.append(f"{file}: ERROR - {e}")
+              print(f"Error with {file}: {e}")
+
+      print("\n" + "="*50)
+      print(f"TOTAL ROWS: {total_rows:,}")
+
+      # Output for downstream tasks
+      print(f"\n::set-output name=total_rows::{total_rows}")
