@@ -430,20 +430,33 @@ where rn = 2
 order by pickup_zone;
 ```
 
-**Output:**
+**Output (verified with local parquet data):**
 
 | pickup_zone | dropoff_zone | p90_trip_duration |
 |-------------|-------------|-------------------|
-| Newark Airport | LaGuardia Airport | High (long airport-to-airport transfer) |
-| SoHo | Park Slope | Moderate (cross-borough trip) |
-| Yorkville East | Clinton East | Moderate (Manhattan cross-town) |
+| Newark Airport | LaGuardia Airport | 7,029s (117.1 min) |
+| SoHo | Chinatown | 19,496s (324.9 min) |
+| Yorkville East | Garment District | 13,846s (230.8 min) |
 
-**Explanation:**
-- **Newark Airport → LaGuardia Airport**: The 2nd longest p90 trip — airport-to-airport transfers are among the longest FHV trips
-- **SoHo → Park Slope**: Brooklyn-bound trips from SoHo cross the bridge, resulting in longer durations
-- **Yorkville East → Clinton East**: Cross-town Manhattan trips through midtown traffic
+**Full top-5 for each pickup zone:**
+```
+Newark Airport:
+  1. Williamsburg (South Side): 8,201s (136.7 min)
+  2. LaGuardia Airport: 7,029s (117.1 min) <-- 2nd
+  3. Alphabet City: 6,349s (105.8 min)
 
-**Answer: LaGuardia Airport, Park Slope, Clinton East**
+SoHo:
+  1. Greenwich Village South: 21,635s (360.6 min)
+  2. Chinatown: 19,496s (324.9 min) <-- 2nd
+  3. SoHo: 18,507s (308.4 min)
+
+Yorkville East:
+  1. Sutton Place/Turtle Bay North: 18,074s (301.2 min)
+  2. Garment District: 13,846s (230.8 min) <-- 2nd
+  3. Clinton East: 10,428s (173.8 min)
+```
+
+**Answer: LaGuardia Airport, Chinatown, Garment District**
 
 ---
 
@@ -457,7 +470,7 @@ order by pickup_zone;
 | Q4: Macro TRUE statements | **Statements 1, 3, 4, and 5 are TRUE** |
 | Q5: Best/worst 2020 quarters | **green: {best: Q1, worst: Q2}, yellow: {best: Q1, worst: Q2}** |
 | Q6: April 2020 fare percentiles | **green: {p97: 55.0, p95: 45.0, p90: 26.5}, yellow: {p97: 31.5, p95: 25.5, p90: 19.0}** |
-| Q7: 2nd longest p90 FHV dropoff zones | **LaGuardia Airport, Park Slope, Clinton East** |
+| Q7: 2nd longest p90 FHV dropoff zones | **LaGuardia Airport, Chinatown, Garment District** |
 
 ---
 

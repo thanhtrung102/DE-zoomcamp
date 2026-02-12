@@ -160,10 +160,21 @@ WHERE fare_amount = 0;
 ```
 zero_fare_count
 ---------------
-128,210
+8,333
 ```
 
-**Answer: 128,210**
+**Verification (local parquet query):**
+```
+Month 01: 2,964,624 rows,   893 zero-fare records
+Month 02: 3,007,526 rows,   844 zero-fare records
+Month 03: 3,582,628 rows, 1,292 zero-fare records
+Month 04: 3,514,289 rows, 1,308 zero-fare records
+Month 05: 3,723,833 rows, 2,618 zero-fare records
+Month 06: 3,539,193 rows, 1,378 zero-fare records
+TOTAL:   20,332,093 rows, 8,333 zero-fare records
+```
+
+**Answer: 8,333**
 
 ---
 
@@ -323,7 +334,7 @@ This is different from:
 | Q1: Record count | **20,332,093** |
 | Q2: Estimated data for distinct PULocationIDs | **0 MB for External Table, 155.12 MB for Materialized Table** |
 | Q3: Why estimated bytes differ | **BigQuery is columnar; querying two columns requires reading more data than one column** |
-| Q4: Records with fare_amount = 0 | **128,210** |
+| Q4: Records with fare_amount = 0 | **8,333** |
 | Q5: Best optimization strategy | **Partition by tpep_dropoff_datetime and Cluster on VendorID** |
 | Q6: Materialized vs Partitioned bytes | **310.24 MB for non-partitioned, 26.84 MB for partitioned** |
 | Q7: External table data location | **GCP Bucket** |
